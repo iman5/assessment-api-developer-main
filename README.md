@@ -1,44 +1,87 @@
-# API Developer Assessment
+# Customer Management System
 
-In this assessment, you will demonstrate your ability to refactor code, implement common code and API design patterns and principles used in our codebase.
+Welcome to the Customer Management System repository! This project focuses on developing a robust application that adheres to SOLID design principles, implements intelligent validation, provides RESTful APIs, and integrates with a user-friendly UI for managing customer data.
 
-Knowledge of common design patterns used in .NET C# development will be beneficial.
-## Assignment
+## Key Features
 
-The Customers.aspx page has code that renders a very simple form that allows users to add a customer to a dropdown list. The customers
-dropdown list is loaded from a local data repository.
+- **SOLID Refactoring:**  
+  The codebase has been refactored so that each model and service conforms to SOLID principles. Each class has a single responsibility, can be extended without modification, and relies on abstractions rather than concrete implementations.
 
-The main goal is to refactor and modify the underlying code to meet common coding disciplines and patterns while also building out API endpoints for the Customer. 
-Design choices should demonstrate an understanding of testing and long term maintainability considerations.
+- **Intelligent Field Validation:**  
+  Advanced validation logic has been implemented for both form inputs and API endpoints. For example, if a US state is provided, the Postal Code/ZIP field is validated against the expected formats (`#####` or `#####-####`), and vice versa.
 
-The changes should include the following:
+- **RESTful API Endpoints:**  
+  Fully implemented RESTful APIs offer complete CRUD (Create, Read, Update, Delete) functionality for customer data:
+  - **Create:** `POST /api/customers`
+  - **Read (Single):** `GET /api/customers/{id}`
+  - **Read (All):** `GET /api/customers`
+  - **Update:** `PUT /api/customers/{id}`
+  - **Delete:** `DELETE /api/customers/{id}`
 
-1. Refactoring of the model code to follow the SOLID design principle
-2. Add intelligent validation to the fields on the form and via API. IE If a US State is provided, the Postal Code/ZIP field should validate that the 
-value matches the expected ZIP code formats of ##### or #####-#### and vice versa
-3. Implement RESTful API's to:
-  - Create customers
-  - Read a single customer by ID
-  - Read all customers
-  - Update
-  - Delete
-4. Allow updating and deletion of customer data listed in the customers drop down list
+- **UI Integration:**  
+  The UI includes dynamic dropdown functionality that allows users to update and delete customer data directly, with the interface refreshing automatically to reflect changes.
 
+## Development Steps
 
-### Requirements
+### 1. Model Refactoring
+- **Objective:** Refactor the model code to follow SOLID principles.
+- **Details:**
+  - **Single Responsibility:** Each class now addresses a specific aspect of customer data management.
+  - **Open/Closed & Dependency Inversion:** Abstractions and interfaces have been introduced so that new functionality can be added without modifying existing code.
 
-1. Complete the main goal, with a keen focus on high quality API endpoint design and functionality
-2. Provide a git repository with your solution using a link to a publicly accessible repository
-3. Creation of new objects is expected if SOLID design principles are implemented
-4. Use the git commit history to show progress and your thought process
+### 2. Intelligent Field Validation
+- **Objective:** Implement robust and intelligent validation for customer fields.
+- **Details:**
+  - Validation is performed on both the client forms and via API endpoints.
+  - For instance, when a US state is provided, the ZIP code is validated against the formats `#####` or `#####-####`. Conversely, a ZIP code input triggers validation for the corresponding state.
 
-#### Extra credit
+### 3. RESTful API Implementation
+- **Objective:** Provide a full set of CRUD operations for managing customer data.
+- **Details:**
+  - **POST /api/customers:** Create a new customer.
+  - **GET /api/customers/{id}:** Retrieve the details of a specific customer.
+  - **GET /api/customers:** Retrieve all customer records.
+  - **PUT /api/customers/{id}:** Update an existing customer's data.
+  - **DELETE /api/customers/{id}:** Delete a customer from the system.
 
-If time allows, add unit testing for the field validations.
+### 4. UI Integration for Dropdown Actions
+- **Objective:** Empower users with the ability to update and delete customer data directly through the UI.
+- **Details:**
+  - The customer dropdown list on the UI has been enhanced so that selections trigger RESTful API calls to update or delete the corresponding customer records.
+  - The UI refreshes automatically to showcase the latest data after any modifications.
 
-## Delivery
+### 5. Testing and Continuous Integration
+- **Objective:** Ensure the reliability and quality of the application through comprehensive testing.
+- **Details:**
+  - **Unit Tests:** MSTest-based tests have been added to validate individual methods, such as field validation logic.
+  - **Integration Tests:** End-to-end testing ensures all RESTful endpoints work as expected.
+  - Regular commits and continuous integration practices help ensure stable builds and code quality.
 
-1. Create a new repository with the initial code and complete your solution on top of it, do not fork the repository
-2. Add a README-IMPLEMENTED.md with any details necessary
-3. Once the solution is built, send your solution to your hiring contact
-4. Please deliver the solution within 7 days of receiving this assessment
+## Installation and Setup
+
+### Build the Solution:
+Open the solution file in Visual Studio.
+
+Build the project to verify that all dependencies and references compile correctly.
+
+### Restore Dependencies:
+Restore the NuGet packages using Visual Studio's built-in package restore feature.
+
+### Run the Application:
+Launch the application from Visual Studio.
+
+Test the API endpoints using tools such as Postman or via the Swagger UI if configured.
+
+### Run Tests:
+Open the Test Explorer in Visual Studio.
+
+Execute all unit and integration tests to verify that everything is functioning as expected.
+
+## Technology Stack
+
+- **Backend:** ASP.NET Web API
+- **Frontend:** Web Forms
+- **Database:** Entity Framework
+- **Unit Testing:** MSTest
+- **Dependency Injection:** Simple Injector
+- **Validation:** Custom regex-based and business logic validations
