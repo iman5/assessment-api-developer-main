@@ -1,17 +1,21 @@
-﻿using SimpleInjector;
+﻿using assessment_platform_developer.Models;
+using assessment_platform_developer.Repositories;
+using assessment_platform_developer.Services;
+using Microsoft.Web.Infrastructure.DynamicModuleHelper;
+using SimpleInjector;
+using SimpleInjector.Diagnostics;
+using SimpleInjector.Integration.Web;
+using SimpleInjector.Integration.WebApi;
 using System;
+using System.Data.Entity;
 using System.Linq;
 using System.Reflection;
 using System.Web;
+using System.Web.Compilation;
+using System.Web.Http;
 using System.Web.Optimization;
 using System.Web.Routing;
-using assessment_platform_developer.Repositories;
-using SimpleInjector.Diagnostics;
-using System.Web.Compilation;
 using System.Web.UI;
-using Microsoft.Web.Infrastructure.DynamicModuleHelper;
-using assessment_platform_developer.Services;
-using SimpleInjector.Integration.Web;
 
 namespace assessment_platform_developer
 {
@@ -55,41 +59,65 @@ namespace assessment_platform_developer
 				.InitializeInstance(handler);
 		}
 
-		void Application_Start(object sender, EventArgs e)
-		{
+        void Application_Start(object sender, EventArgs e)
+        {
+            // Register Web API routes.
+            GlobalConfiguration.Configure(WebApiConfig.Register);
 
-			// Code that runs on application startup
-			RouteConfig.RegisterRoutes(RouteTable.Routes);
-			BundleConfig.RegisterBundles(BundleTable.Bundles);
+            // Register Web Forms routes and bundles.
+            RouteConfig.RegisterRoutes(RouteTable.Routes);
+            BundleConfig.RegisterBundles(BundleTable.Bundles);
 
+            // Set the database initializer.
+            Database.SetInitializer(new DropCreateDatabaseAlways<CustomerDBContext>());
 
-			Bootstrap();
-		}
+            // Force immediate initialization and seed the database.
+            using (var context = new CustomerDBContext())
+            {
+                context.Database.Initialize(force: true);
+                CustomerSeeder.Seed(context);
+            }
 
-		private static void Bootstrap()
-		{
-			// 1. Create a new Simple Injector container.
-			var container = new Container();
+            Bootstrap();
+        }
 
-			container.Options.DefaultScopedLifestyle = new WebRequestLifestyle();
+        private static void Bootstrap()
+        {
+            // 1. Create a new Simple Injector container.
+            var container = new Container();
 
-			// 2. Configure the container (register)
-			container.Register<ICustomerRepository, CustomerRepository>(Lifestyle.Singleton);
-			container.Register<ICustomerService, CustomerService>(Lifestyle.Scoped);
+            // Use WebRequestLifestyle as the default scoped lifestyle.
+            container.Options.DefaultScopedLifestyle = new WebRequestLifestyle();
 
-			// Register your Page classes to allow them to be verified and diagnosed.
-			RegisterWebPages(container);
-			container.Options.ResolveUnregisteredConcreteTypes = true;
+            // 2. Register Web API controllers.
+            container.RegisterWebApiControllers(GlobalConfiguration.Configuration);
 
-			// 3. Store the container for use by Page classes.
-			Global.container = container;
-			// 3. Verify the container's configuration.
-			container.Verify();
+            // Register the DbContext as scoped.
+            container.Register<CustomerDBContext>(Lifestyle.Scoped);
 
-			HttpContext.Current.Application["DIContainer"] = container;
-		}
+            // 3. Register application components.
+            container.Register<ICustomerRepository, CustomerRepository>(Lifestyle.Scoped);
+            container.Register<ICustomerService, CustomerService>(Lifestyle.Scoped);
 
-		private static void RegisterWebPages(Container container)
+            // Register your Web Forms pages.
+            RegisterWebPages(container);
+
+            // Resolve unregistered concrete types.
+            container.Options.ResolveUnregisteredConcreteTypes = true;
+
+            // Set the dependency resolver for Web API.
+            GlobalConfiguration.Configuration.DependencyResolver =
+                new SimpleInjectorWebApiDependencyResolver(container);
+
+            Global.container = container;
+
+            // 4. Verify the container's configuration.
+            container.Verify();
+
+            HttpContext.Current.Application["DIContainer"] = container;
+        }
+
+        private static void RegisterWebPages(Container container)
 		{
 			var pageTypes =
 				from assembly in BuildManager.GetReferencedAssemblies().Cast<Assembly>()
